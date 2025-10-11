@@ -1,11 +1,4 @@
-import os  # Add this at the top if not there
-image_path = f"sample_images/{filename}"
-exists = os.path.exists(image_path)
-st.write(f"Debug: Path '{image_path}' exists? {exists}")  # This will show on the app
-if not exists:
-    st.error(f"Missing: {image_path}")
-else:
-    st.image(image_path, caption=label, use_container_width=True)
+
 import streamlit as st
 from reke_api import verify
 
@@ -39,6 +32,14 @@ index = 0
 # --- Display Images + Buttons ---
 for label, filename in samples.items():
     with cols[index % 3]:
+        import os  # Add this at the top if not there
+image_path = f"sample_images/{filename}"
+exists = os.path.exists(image_path)
+st.write(f"Debug: Path '{image_path}' exists? {exists}")  # This will show on the app
+if not exists:
+    st.error(f"Missing: {image_path}")
+else:
+    st.image(image_path, caption=label, use_container_width=True)
         st.image(f"sample_images/{filename}", caption=label, use_container_width=True)
         if st.button(f"Verify {label}", key=filename):
             result = verify(filename)
