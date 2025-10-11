@@ -14,7 +14,7 @@ Choose a sample image and see how Reke’s verification API detects AI-generated
 
 # --- Sample Images ---
 samples = {
-    "AI Mode": "ai_mode.jpg",
+    "AI Model": "ai_model.jpg",
     "AI Painter": "ai_painter.jpg",
     "AI Panda-Chimp": "ai_panda_chimp.jpg",
     "AI Woman": "ai_woman.jpg",
