@@ -1,6 +1,5 @@
-
 import streamlit as st
-from reke_api import verify
+import os  # Add this for debugging
 
 # --- Streamlit Page Config ---
 st.set_page_config(page_title="Reke Demo", page_icon="🛡️", layout="wide")
@@ -32,15 +31,12 @@ index = 0
 # --- Display Images + Buttons ---
 for label, filename in samples.items():
     with cols[index % 3]:
-        import os  # Add this at the top if not there
-image_path = f"sample_images/{filename}"
-exists = os.path.exists(image_path)
-st.write(f"Debug: Path '{image_path}' exists? {exists}")  # This will show on the app
-if not exists:
-    st.error(f"Missing: {image_path}")
-else:
-    st.image(image_path, caption=label, use_container_width=True)
-        st.image(f"sample_images/{filename}", caption=label, use_container_width=True)
+        image_path = f"sample_images/{filename}"
+        exists = os.path.exists(image_path)
+        st.write(f"Debug: Path '{image_path}' exists? {exists}")  # Debug line
+        if not exists:
+            st.error(f"Missing: {image_path}")
+        st.image(image_path, caption=label, use_container_width=True)  # Fixed indent
         if st.button(f"Verify {label}", key=filename):
             result = verify(filename)
             st.session_state["result"] = result
