@@ -21,7 +21,7 @@ samples = {
     "Real Cat": "real_cat.jpg",
     "Real Child": "real_child.jpg",
     "Real Dog": "real_dog.jpg",
-    "Real Man": "real_man.jpg.jpg",
+    "Real Man": "real_man.jpg",
     "Real Woman": "real_woman.jpg"
 }
 
