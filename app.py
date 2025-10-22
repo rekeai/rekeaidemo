@@ -38,7 +38,7 @@ st.markdown("# 🛡️ Reke AI Verification Demo")
 st.write("**Select an image below to test the Reke API.** The system detects Tree-Ring watermarks to verify if content is AI-generated or real.")
 
 samples = {
-    "AI Mode": "ai_mode.jpg",
+    "AI Model": "ai_model.jpg",
     "AI Painter": "ai_painter.jpg",
     "AI Panda-Chimp": "ai_panda_chimp.jpg",
     "AI Woman": "ai_woman.jpg",
