@@ -1,5 +1,5 @@
 # sdk/watermark.py
-"""
+"""123
 Demo Reke SDK (prototype).
 - embed_watermark(input_path, output_path, origin)
 - verify_image_bytes(image_bytes) -> (status_str, manifest_or_none, sig_ok_bool)
