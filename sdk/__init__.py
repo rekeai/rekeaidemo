@@ -1,3 +1,3 @@
-# SDK Init — prepare the simulated internal tools.
-from .watermark import detect_watermark
-from .c2pa_manifest import verify_c2pa_manifest
+# sdk/__init__.py
+from .watermark import embed_watermark, verify_image_bytes
+__all__ = ["embed_watermark", "verify_image_bytes"]
