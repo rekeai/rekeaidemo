@@ -1,9 +1,10 @@
-# app.py
 import streamlit as st
 from reke_api import verify
 
+# ----- PAGE CONFIG -----
 st.set_page_config(page_title="Reke Demo", page_icon="🛡️", layout="wide")
 
+# ----- STYLE -----
 st.markdown("""
 <style>
 body {
@@ -13,9 +14,8 @@ body {
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
-h1 {
+h1, h2, h3 {
     text-align: center;
-    font-weight: 700;
 }
 .sample-thumb {
     border-radius: 10px;
@@ -30,13 +30,16 @@ h1 {
     border-radius: 10px;
     padding: 1.5rem;
     text-align: center;
+    font-size: 1.1rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
+# ----- PAGE TITLE -----
 st.markdown("# 🛡️ Reke AI Verification Demo")
-st.write("**Select an image below to test the Reke API.** The system detects Tree-Ring watermarks to verify if content is AI-generated or real.")
+st.write("**Select an image below and click ‘Verify’.** Reke detects embedded Tree-Ring watermarks to determine if content is AI-generated or real.")
 
+# ----- SAMPLE IMAGES -----
 samples = {
     "AI Model": "https://ul.postcrest.com/90uqa61eksfuzyj8uppr50be8tsj.png?format=webp&width=1664",
     "AI Painter": "https://preview.redd.it/ai-images-are-getting-too-realistic-v0-nxue8y4zt9be1.png?width=1080&crop=smart&auto=webp&s=a3f70deb45f4f4d50c09f8ffa439a83b05504440",
@@ -49,23 +52,39 @@ samples = {
     "Real Woman": "https://img.freepik.com/free-photo/portrait-young-attractive-emotional-girl-dressed-trendy-blue-denim-coat_1153-3942.jpg"
 }
 
-cols = st.columns(5)
+# ----- STATE INITIALIZATION -----
+if "selected_image" not in st.session_state:
+    st.session_state["selected_image"] = None
+    st.session_state["selected_label"] = None
+if "result" not in st.session_state:
+    st.session_state["result"] = None
 
-for i, (label, url) in enumerate(samples.items()):
+# ----- IMAGE SELECTION -----
+cols = st.columns(5)
+i = 0
+for label, url in samples.items():
     with cols[i % 5]:
-        if st.button(label, key=label):
+        st.image(url, caption=label, use_container_width=True)
+        if st.button(f"Select {label}", key=f"btn_{label}"):
             st.session_state["selected_image"] = url
             st.session_state["selected_label"] = label
+            st.session_state["result"] = None  # reset previous result
+    i += 1
 
 st.markdown("---")
 
-if "selected_image" in st.session_state:
+# ----- DISPLAY SELECTED IMAGE -----
+if st.session_state["selected_image"]:
     st.image(st.session_state["selected_image"], caption=st.session_state["selected_label"], use_container_width=True)
-    if st.button("🔍 Verify Image"):
-        result = verify(st.session_state["selected_label"].replace(" ", "_").lower())
+
+    # ----- VERIFY BUTTON -----
+    if st.button("🔍 Verify Image", use_container_width=True):
+        label_id = st.session_state["selected_label"].replace(" ", "_").lower()
+        result = verify(label_id)
         st.session_state["result"] = result
 
-if "result" in st.session_state:
+# ----- RESULT BOX -----
+if st.session_state["result"]:
     res = st.session_state["result"]
     st.markdown("---")
     st.markdown("### ✅ Verification Result")
