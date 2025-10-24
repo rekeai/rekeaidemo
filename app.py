@@ -7,37 +7,20 @@ st.set_page_config(page_title="Reke Demo", page_icon="🛡️", layout="wide")
 # ----- STYLE -----
 st.markdown("""
 <style>
-body {
-    font-family: 'Inter', sans-serif;
-}
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-h1, h2, h3 {
-    text-align: center;
-}
-.sample-thumb {
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.sample-thumb:hover {
-    transform: scale(1.05);
-}
-.result-box {
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    padding: 1.5rem;
-    text-align: center;
-    font-size: 1.1rem;
-}
+body {font-family: 'Inter', sans-serif;}
+.block-container {padding-top: 2rem; padding-bottom: 2rem;}
+h1, h2, h3 {text-align: center;}
+.sample-thumb {border-radius: 10px; cursor: pointer; transition: 0.3s;}
+.sample-thumb:hover {transform: scale(1.05);}
+.result-box {background-color: #f8f9fa; border-radius: 10px; padding: 1.5rem;
+text-align: center; font-size: 1.1rem;}
+button[kind="primary"] {border-radius: 6px;}
 </style>
 """, unsafe_allow_html=True)
 
 # ----- PAGE TITLE -----
 st.markdown("# 🛡️ Reke AI Verification Demo")
-st.write("**Select an image below and click ‘Verify’.** Reke detects embedded Tree-Ring watermarks to determine if content is AI-generated or real.")
+st.write("Select an image and click **Verify**. Reke detects embedded watermarks to determine if it’s AI-generated or real.")
 
 # ----- SAMPLE IMAGES -----
 samples = {
@@ -64,20 +47,19 @@ cols = st.columns(5)
 i = 0
 for label, url in samples.items():
     with cols[i % 5]:
-        st.image(url, caption=label, use_container_width=True)
+        st.image(url, caption=label, use_column_width=True)
         if st.button(f"Select {label}", key=f"btn_{label}"):
             st.session_state["selected_image"] = url
             st.session_state["selected_label"] = label
-            st.session_state["result"] = None  # reset previous result
+            st.session_state["result"] = None
     i += 1
 
 st.markdown("---")
 
 # ----- DISPLAY SELECTED IMAGE -----
 if st.session_state["selected_image"]:
-    st.image(st.session_state["selected_image"], caption=st.session_state["selected_label"], use_container_width=True)
+    st.image(st.session_state["selected_image"], caption=st.session_state["selected_label"], use_column_width=True)
 
-    # ----- VERIFY BUTTON -----
     if st.button("🔍 Verify Image", use_container_width=True):
         label_id = st.session_state["selected_label"].replace(" ", "_").lower()
         result = verify(label_id)
