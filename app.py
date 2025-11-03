@@ -12,10 +12,12 @@ st.markdown("<style>footer{visibility:hidden} .thumb{border-radius:8px;}</style>
 st.title("🛡️ Reke — Demo")
 st.write("Click a sample to preview and press **Verify Image**. (4 AI samples are watermarked; 5 real samples are not.)")
 
-# Sample setup
+# ───────────────────────────────
+#  Setup: Sample Images
+# ───────────────────────────────
 SAMPLE_DIR = "sample_images"
 SAMPLE_FILENAMES = [
-    "ai_mode.jpg",
+    "ai_model.jpg",
     "ai_painter.jpg",
     "ai_panda_chimp.jpg",
     "ai_woman.jpg",
@@ -26,13 +28,12 @@ SAMPLE_FILENAMES = [
     "real_woman.jpg",
 ]
 
-# Classification map for demo
-AI_SAMPLES = {"ai_mode.jpg", "ai_painter.jpg", "ai_panda_chimp.jpg", "ai_woman.jpg"}
+AI_SAMPLES = {"ai_model.jpg", "ai_painter.jpg", "ai_panda_chimp.jpg", "ai_woman.jpg"}
 REAL_SAMPLES = {"real_cat.jpg", "real_child.jpg", "real_dog.jpg", "real_man.jpg", "real_woman.jpg"}
 
-# Fallback URLs if sample_images folder is missing
+# Fallback URLs for remote demo
 FALLBACK = {
-    "ai_mode.jpg": "https://ul.postcrest.com/90uqa61eksfuzyj8uppr50be8tsj.png?format=webp&width=1664",
+    "ai_model.jpg": "https://ul.postcrest.com/90uqa61eksfuzyj8uppr50be8tsj.png?format=webp&width=1664",
     "ai_painter.jpg": "https://preview.redd.it/ai-images-are-getting-too-realistic-v0-nxue8y4zt9be1.png?width=1080&crop=smart&auto=webp",
     "ai_panda_chimp.jpg": "https://preview.redd.it/ai-images-are-getting-too-realistic-v0-sejwvqqzt9be1.png?width=1080&crop=smart&auto=webp",
     "ai_woman.jpg": "https://preview.redd.it/ai-images-are-getting-too-realistic-v0-l2zp3ra0u9be1.png?width=1080&crop=smart&auto=webp",
@@ -43,7 +44,6 @@ FALLBACK = {
     "real_woman.jpg": "https://img.freepik.com/free-photo/portrait-young-attractive-emotional-girl-dressed-trendy-blue-denim-coat_1153-3942.jpg",
 }
 
-# Build samples dictionary (local or remote)
 samples = {}
 for fn in SAMPLE_FILENAMES:
     local_path = os.path.join(SAMPLE_DIR, fn)
@@ -52,7 +52,9 @@ for fn in SAMPLE_FILENAMES:
     else:
         samples[fn] = FALLBACK.get(fn, "")
 
-# Pre-watermark AI images so they’re detectable
+# ───────────────────────────────
+#  Embed Watermarks for AI Samples
+# ───────────────────────────────
 os.makedirs("watermarked", exist_ok=True)
 for fn in AI_SAMPLES:
     src = samples[fn]
@@ -72,15 +74,16 @@ for fn in AI_SAMPLES:
         except Exception:
             pass
     if os.path.exists(dst):
-        samples[fn] = dst  # use watermarked copy
+        samples[fn] = dst
 
-# State
+# ───────────────────────────────
+#  Streamlit UI
+# ───────────────────────────────
 if "selected" not in st.session_state:
     st.session_state["selected"] = None
 if "selected_file" not in st.session_state:
     st.session_state["selected_file"] = None
 
-# Layout
 left, right = st.columns([2, 1])
 with left:
     st.markdown("### Preview")
@@ -102,20 +105,21 @@ with right:
             elif filename in REAL_SAMPLES:
                 st.info("✅ Real — No watermark detected")
             else:
-                # anything else (uploads or unknowns)
                 st.info("✅ Real — No watermark detected (no registered watermark)")
             st.markdown("---")
 
 st.markdown("### Samples")
 cols = st.columns(5)
-i = 0
-for fn, path in samples.items():
+for i, (fn, path) in enumerate(samples.items()):
     with cols[i % 5]:
-        st.image(path, use_column_width=True)
-        if st.button("", key=f"select_{i}"):
+        if st.button(" ", key=f"select_{i}"):
             st.session_state["selected"] = path
             st.session_state["selected_file"] = fn
-    i += 1
+        st.image(path, use_column_width=True)
 
 st.markdown("---")
-st.caption("Demo: AI samples contain a synthetic Reke watermark. Real samples are plain. Future version integrates Tree-Ring, C2PA, SDK-wide verification, and screenshot survival.")
+st.caption(
+    "Demo: AI samples contain a synthetic Reke watermark. Real samples are plain. "
+    "Future versions will include Tree-Ring watermarking, C2PA provenance, screenshot tamper resistance, "
+    "and global SDK integration with AI generators and APIs."
+)
