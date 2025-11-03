@@ -1,80 +1,46 @@
-import hashlib
-import hmac
-import json
-import io
+# sdk.py
 from PIL import Image
+import numpy as np
+import io
 
-# Secret key for demo HMAC signature (in production, each AI model would have its own key)
-SECRET_KEY = b"reke_demo_secret_key"
-
-
-def _hmac_sig(content_hash: str) -> str:
-    """Generate HMAC signature for the given hash."""
-    return hmac.new(SECRET_KEY, content_hash.encode(), hashlib.sha256).hexdigest()
-
-
-def embed_watermark(image_path: str, ai_generator: str) -> bytes:
+# Simple invisible watermark embedder for demo (not real cryptographic watermark)
+def embed_watermark(input_image_path, output_image_path, origin="Reke AI Generator"):
     """
-    Simulate embedding Tree-Ring invisible watermark.
-    Stores a lightweight manifest in PNG metadata.
-    """
-    img = Image.open(image_path).convert("RGB")
-    content_hash = hashlib.sha256(img.tobytes()).hexdigest()
-
-    manifest = {
-        "generator": ai_generator,
-        "version": "0.1-demo",
-        "content_hash": content_hash,
-        "sig": _hmac_sig(content_hash)
-    }
-
-    # Store manifest in image metadata (PNG format)
-    meta = PngInfo()
-    meta.add_text("reke_manifest", json.dumps(manifest))
-
-    # Save to bytes
-    output = io.BytesIO()
-    img.save(output, format="PNG", pnginfo=meta)
-    return output.getvalue()
-
-
-def verify_image_bytes(image_bytes: bytes):
-    """
-    Verify manifest. Simplified for demo:
-    - If a valid REKE manifest exists and signature matches -> AI Generated.
-    - Otherwise -> Real (No watermark detected).
+    Simulates embedding an invisible watermark into an image.
+    For demo purposes only — not a secure or production watermark.
     """
     try:
-        img = Image.open(io.BytesIO(image_bytes))
+        img = Image.open(input_image_path).convert("RGB")
+        arr = np.array(img).astype(np.uint16)
+
+        # Embed a faint repeating pattern in the blue channel
+        # (This is only for visualization in concept demos)
+        watermark_strength = 3
+        pattern = np.tile(np.array([[0, 1], [1, 0]]), (arr.shape[0] // 2, arr.shape[1] // 2))
+        arr[..., 2] = np.clip(arr[..., 2] + (pattern[:arr.shape[0], :arr.shape[1]] * watermark_strength), 0, 255)
+
+        Image.fromarray(arr.astype(np.uint8)).save(output_image_path, "PNG")
+    except Exception as e:
+        print(f"Watermark embed failed for {input_image_path}: {e}")
+
+def verify_image_bytes(image_bytes):
+    """
+    Simulates verifying watermark presence.
+    Returns:
+        dict: { "watermark_detected": bool, "origin": str }
+    """
+    try:
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        arr = np.array(img).astype(np.int16)
+
+        # Detect the faint pattern in the blue channel
+        mean_blue = arr[..., 2].mean()
+        diff = np.abs(arr[..., 2] - mean_blue)
+        pattern_signal = (diff > 2).mean()
+
+        if pattern_signal > 0.15:
+            return {"watermark_detected": True, "origin": "Reke AI Generator"}
+        else:
+            return {"watermark_detected": False, "origin": None}
     except Exception:
-        return "Unknown", None, False
-
-    manifest = None
-    sig_ok = False
-
-    # Check manifest (PNG tEXt field)
-    if img.format == "PNG":
-        m = img.info.get("reke_manifest")
-        if m:
-            try:
-                manifest = json.loads(m)
-            except Exception:
-                manifest = None
-        if manifest and "content_hash" in manifest and "sig" in manifest:
-            expected = _hmac_sig(manifest["content_hash"])
-            if expected == manifest.get("sig"):
-                sig_ok = True
-
-    if sig_ok and manifest:
-        # ✅ AI watermarked image detected
-        return "AI Generated", manifest, True
-
-    # ✅ No manifest → Real
-    return "Real", None, False
-
-
-# Helper for local file verification (used in reke_api.py)
-def verify_local_image(file_path: str):
-    with open(file_path, "rb") as f:
-        img_bytes = f.read()
-    return verify_image_bytes(img_bytes)
+        return {"watermark_detected": False, "origin": None}
